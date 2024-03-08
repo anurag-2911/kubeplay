@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cluster-virtual-service
+  namespace: default  # Use the namespace where service is deployed
+spec:
+  hosts:
+  - "*"  # This should match the host in the Gateway configuration. Adjust as necessary.
+  gateways:
+  - cluster-gateway
+  http:    
+  - match:
+    - uri:
+        prefix: "/message"  # Path for the microservice's endpoint
+    route:
+    - destination:
+        host: simple-msg-svc.default.svc.cluster.local  # this should match the service's name and namespace
+        port:
+          number: 80
