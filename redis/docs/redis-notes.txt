@@ -1,0 +1,134 @@
+Deploying Redis in the Kubernetes cluster can be achieved through various methods, 
+including using Helm charts, Kubernetes manifests, or operators. 
+Below is a guide to deploying Redis using Helm, 
+which is one of the most popular and straightforward methods.
+
+### Prerequisites
+- A running Kubernetes cluster.
+- `kubectl` configured to communicate with the cluster.
+- Helm installed on the machine.
+
+### Step 1: Add the Redis Helm Chart Repository
+Helm charts are pre-configured Kubernetes resources that can be deployed with minimal setup. 
+Bitnami maintains a popular Redis chart. 
+First, add the Bitnami repository to Helm:
+
+```sh
+helm repo add bitnami https://charts.bitnami.com/bitnami
+```
+
+### Step 2: Update Helm Repositories
+Update the Helm repositories to ensure they have the latest version of the charts:
+
+
+helm repo update
+
+
+### Step 3: Deploy Redis
+Deploy Redis to the Kubernetes cluster using the Bitnami chart. 
+It can customize the deployment by creating a values.yaml file 
+or by setting parameters with `--set` flags. 
+The following command deploys Redis with default settings:
+
+
+helm install redis-cache bitnami/redis
+
+helm install redis-cache bitnami/redis
+
+NAME: redis-cache
+LAST DEPLOYED: Fri Mar  8 22:19:39 2024
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CHART NAME: redis
+CHART VERSION: 18.19.0
+APP VERSION: 7.2.4
+
+** Please be patient while the chart is being deployed **
+
+Redis can be accessed on the following DNS names from within your cluster:
+
+    redis-cache-master.default.svc.cluster.local for read/write operations (port 6379)
+    redis-cache-replicas.default.svc.cluster.local for read-only operations (port 6379)
+
+
+
+To get your password run: YUhQQVRUU1VocQ== base64 -d :>    WVVoUVFWUlVVMVZvY1E9PQ==
+
+    export REDIS_PASSWORD=$(kubectl get secret --namespace default redis-cache -o jsonpath="{.data.redis-password}" | base64 -d)
+
+To connect to your Redis&reg; server:
+
+1. Run a Redis&reg; pod that you can use as a client:
+
+   kubectl run --namespace default redis-client --restart='Never'  --env REDIS_PASSWORD=$REDIS_PASSWORD  --image docker.io/bitnami/redis:7.2.4-debian-12-r9 --command -- sleep infinity
+
+   Use the following command to attach to the pod:
+
+   kubectl exec --tty -i redis-client \
+   --namespace default -- bash
+
+2. Connect using the Redis&reg; CLI:
+   REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h redis-cache-master
+   REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h redis-cache-replicas
+
+To connect to your database from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace default svc/redis-cache-master 6379:6379 &
+    REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h 127.0.0.1 -p 6379
+
+WARNING: There are "resources" sections in the chart not set. 
+Using "resourcesPreset" is not recommended for production. For production installations, please set the following values according to your workload needs:
+  - master.resources
+  - replica.resources
++info https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+
+
+Replace `redis-cache` with a name for the Redis deployment.
+
+### Step 4: Retrieve Redis Password
+If the didn't set a custom password, the chart generates a random one for the. 
+Retrieve the Redis password by running:
+
+
+kubectl get secret --namespace default redis-cache -o jsonpath="{.data.redis-password}" | base64 --decode
+
+
+Note the namespace if the deployed Redis in a namespace othe than `default`.
+
+### Step 5: Connect to Redis
+the can connect to Redis using a Redis client installed on the local machine or 
+by running a Redis client within the Kubernetes cluster. 
+To forward the Redis port to the local machine and connect using the Redis CLI, run:
+
+
+kubectl port-forward --namespace default svc/redis-cache-master 6379:6379 &
+redis-cli -h 127.0.0.1 -p 6379 -a WVVoUVFWUlVVMVZvY1E9PQ==
+
+
+Replace `<password>` with the password retrieved in the previous step.
+
+### Customization and Persistence
+The Bitnami Redis chart offers various customization options, 
+including enabling persistence, configuring replication, and setting resource limits. 
+It can customize these settings by editing the values.yaml 
+file or by specifying `--set` flags during installation. 
+For a highly available Redis setup, consider enabling Redis replication and using Redis Sentinel, 
+which is also supported by the Bitnami chart.
+
+For persistence, ensure that the persistence option is enabled (which it is by default) 
+to retain data across pod restarts. It may also want to configure storage class and 
+size according to the cluster setup.
+
+### Conclusion
+Deploying Redis on Kubernetes using Helm simplifies the process and provides
+a flexible and scalable method to manage Redis instances. 
+After deployment, ensure to configure the applications to use the Redis instance by providing 
+the correct service name (`redis-cache-master` for standalone or `redis-cache-headless` for replication) 
+and password as connection parameters.
+
+For advanced configurations and production deployments, 
+review the Bitnami Redis chart documentation and Kubernetes best practices regarding security, 
+high availability, and persistence.

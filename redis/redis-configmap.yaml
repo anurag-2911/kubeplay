@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+data:
+  REDIS_MASTER_ADDR: "redis-cache-master.default.svc.cluster.local:6379"
+  REDIS_REPLICA_ADDR: "redis-cache-replicas.default.svc.cluster.local:6379"
