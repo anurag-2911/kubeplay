@@ -1,0 +1,5 @@
+kubectl create namespace monitoring
+
+helm repo add stable https://charts.helm.sh/stable
+
+helm repo update

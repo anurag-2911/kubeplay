@@ -16,4 +16,5 @@ spec:
     - destination:
         host: simple-msg-svc.default.svc.cluster.local  # this should match the service's name and namespace
         port:
-          number: 80
+          number: 443
+    
