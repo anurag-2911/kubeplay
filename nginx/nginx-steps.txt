@@ -1,3 +1,5 @@
+# Steps from : https://www.linode.com/docs/guides/deploy-nginx-ingress-on-lke/
+
 # In the domain provider
 Nameservers, add the following Nameservers:
 ns1.linode.com
